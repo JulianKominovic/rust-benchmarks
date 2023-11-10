@@ -5,6 +5,7 @@ try {
 } catch (e) {
   console.log(e);
 }
-for (let i = 0; i < 1_000_000; i++) {
+for (let i = 0; i < 100_000; i++) {
   fs.writeFileSync(`./testings/${i}.js`, "");
 }
+
