@@ -1,5 +1,7 @@
-use jwalk::WalkDir;
-use std::os::unix::prelude::{MetadataExt, PermissionsExt};
+use std::{
+    os::unix::prelude::{MetadataExt, PermissionsExt},
+    path::Path,
+};
 
 const COLUMNS: [&str; 6] = ["Permissions", "Owner", "Group", "Size", "Modified", "Name"];
 const COLUMN_SEPARATOR: &str = " | ";
@@ -43,7 +45,7 @@ fn print_left_aligned(text: &str, _max_width: usize) -> String {
     output.push_str(COLUMN_SEPARATOR);
     output
 }
-pub fn buffer_first_then_stdout() {
+pub fn buffer_reserve_then_stdout() {
     // Args
     let args = std::env::args().collect::<Vec<String>>();
     // #[cfg(debug_assertions)]
@@ -55,29 +57,23 @@ pub fn buffer_first_then_stdout() {
         _ => std::env::current_dir().unwrap(),
     };
     if !path.exists() {
-        path = std::env::current_dir().unwrap();
+        path = Path::new("./testings").to_path_buf();
     }
 
     // #[cfg(debug_assertions)]
     // println!("Path: {:?}", path);
 
-    // let files_intent = std::fs::read_dir(&path);
-    // if files_intent.is_err() {
-    //     println!("Path: {:?}", path);
-    //     println!("Error: {:?}", files_intent.err());
-    //     return;
-    // }
-    // // Error handling
-    // let error = files_intent.as_ref().err();
-    // if error.is_some() {
-    //     println!("Error: {:?}", error);
-    //     return;
-    // }
+    let files_intent = std::fs::read_dir(&path);
+
+    // Error handling
+    let error = files_intent.as_ref().err();
+    if error.is_some() {
+        println!("Error: {:?}", error);
+        return;
+    }
 
     // Printing
-    let mut stdout_temp = String::from("");
-    // let files = files_intent.unwrap();
-    let files = WalkDir::new(&path).max_depth(1);
+    let files = files_intent.unwrap();
 
     let columns_max_width = [
         COLUMNS[0].len(),
@@ -87,6 +83,10 @@ pub fn buffer_first_then_stdout() {
         20,
         20,
     ];
+    let files_len = std::fs::read_dir(path).unwrap().count();
+    let mut stdout_temp =
+        String::with_capacity(files_len * columns_max_width.iter().sum::<usize>() * 2);
+
     stdout_temp.push_str(format!("{:?}\n", columns_max_width).as_str());
     for (i, col) in COLUMNS.iter().enumerate() {
         // Align left
@@ -112,7 +112,7 @@ pub fn buffer_first_then_stdout() {
 
     for wrapped_file in files {
         let file = wrapped_file.unwrap();
-        let name = file.file_name();
+        let name = file.file_name().into_string().unwrap();
         let meta = file.metadata().unwrap();
         // Octal number
         let permissions_bytes = u16::from_str_radix(
@@ -189,7 +189,7 @@ pub fn buffer_first_then_stdout() {
             print_left_aligned(modified_datetime.to_string().as_str(), columns_max_width[4])
                 .as_str(),
         );
-        line.push_str(print_left_aligned(name.to_str().unwrap(), columns_max_width[5]).as_str());
+        line.push_str(print_left_aligned(&name, columns_max_width[5]).as_str());
 
         stdout_temp.push_str(line.as_str());
         stdout_temp.push_str("\n");

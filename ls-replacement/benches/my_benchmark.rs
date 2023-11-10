@@ -1,12 +1,17 @@
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion, SamplingMode};
 use rust_ls::{
     buffer_first_then_stdout, buffer_reserve_then_stdout, directly_stdout,
-    directly_stdout_manual_std_lock,
+    directly_stdout_manual_std_lock, parallel_buffer_first_then_stdout,
 };
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     let mut group = c.benchmark_group("List files in directory");
-
+    group.sample_size(100);
+    group.sampling_mode(SamplingMode::Flat);
+    group.bench_function(
+        "Parallel buffer first then push each line then stdout",
+        |b| b.iter(|| parallel_buffer_first_then_stdout::buffer_first_then_stdout()),
+    );
     group.bench_function("Buffer first then push each line then stdout", |b| {
         b.iter(|| buffer_first_then_stdout::buffer_first_then_stdout())
     });

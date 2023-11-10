@@ -1,3 +1,4 @@
+use std::io::Write;
 use std::{
     os::unix::prelude::{MetadataExt, PermissionsExt},
     path::Path,
@@ -29,7 +30,7 @@ fn print_horizontal_centered(text: &str, _max_width: usize) -> String {
     output.push_str(COLUMN_SEPARATOR);
     output
 }
-fn print_left_aligned(text: &str, _max_width: usize) {
+fn print_left_aligned(text: &str, _max_width: usize, lock: &mut std::io::StdoutLock<'_>) {
     // Align to left
     let max_width = _max_width + PADDING_X * 2;
     let col_width = match text.len() {
@@ -37,13 +38,16 @@ fn print_left_aligned(text: &str, _max_width: usize) {
         len => len,
     };
     let padding_right = max_width - col_width;
-    print!("{}", text);
+    write!(lock, "{}", text);
     for _ in 0..padding_right {
-        print!(" ");
+        write!(lock, " ");
     }
-    print!("{}", COLUMN_SEPARATOR);
+    write!(lock, "{}", COLUMN_SEPARATOR);
 }
-pub fn directly_stdout() {
+pub fn directly_stdout_manual_stdout_lock() {
+    let stdout = std::io::stdout();
+    let mut lock: std::io::StdoutLock<'_> = stdout.lock();
+
     // Args
     let args = std::env::args().collect::<Vec<String>>();
     // #[cfg(debug_assertions)]
@@ -55,7 +59,7 @@ pub fn directly_stdout() {
         _ => std::env::current_dir().unwrap(),
     };
     if !path.exists() {
-        path = std::env::current_dir().unwrap();
+        path = Path::new("./testings").to_path_buf();
     }
 
     // #[cfg(debug_assertions)]
@@ -91,21 +95,21 @@ pub fn directly_stdout() {
             len if len > 0 => len as usize,
             _ => 0,
         };
-        print!("{}", col);
+        write!(&mut lock, "{}", col);
         for _ in 0..padding_right + PADDING_X * 2 {
-            print!(" ");
+            write!(&mut lock, " ");
         }
-        print!("{}", COLUMN_SEPARATOR);
+        write!(&mut lock, "{}", COLUMN_SEPARATOR);
     }
 
-    println!();
+    writeln!(&mut lock);
     for col in columns_max_width {
         for _ in 0..col + PADDING_X * 2 {
-            print!("{}", ROW_SEPARATOR);
+            write!(&mut lock, "{}", ROW_SEPARATOR);
         }
-        print!("{}", COLUMN_SEPARATOR)
+        write!(&mut lock, "{}", COLUMN_SEPARATOR);
     }
-    println!();
+    writeln!(&mut lock);
 
     for wrapped_file in files {
         let file = wrapped_file.unwrap();
@@ -178,13 +182,18 @@ pub fn directly_stdout() {
         let modified_datetime =
             chrono::DateTime::<chrono::Local>::from(modified).format("%Y-%m-%d %H:%M:%S");
 
-        print_left_aligned(&permissions, columns_max_width[0]);
-        print_left_aligned(&user_id.to_string(), columns_max_width[1]);
-        print_left_aligned(&group_id.to_string(), columns_max_width[2]);
-        print_left_aligned(&humanized_size, columns_max_width[3]);
+        print_left_aligned(&permissions, columns_max_width[0], &mut lock);
+        print_left_aligned(&user_id.to_string(), columns_max_width[1], &mut lock);
+        print_left_aligned(&group_id.to_string(), columns_max_width[2], &mut lock);
+        print_left_aligned(&humanized_size, columns_max_width[3], &mut lock);
 
-        print_left_aligned(&modified_datetime.to_string(), columns_max_width[4]);
-        print_left_aligned(&name, columns_max_width[5]);
-        println!()
+        print_left_aligned(
+            &modified_datetime.to_string(),
+            columns_max_width[4],
+            &mut lock,
+        );
+        print_left_aligned(&name, columns_max_width[5], &mut lock);
+        writeln!(&mut lock, "");
     }
+    // print lock
 }

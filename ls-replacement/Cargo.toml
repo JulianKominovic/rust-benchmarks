@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.31"
 jwalk = "0.8.1"
+rayon = "1.8.0"
 
 [dev-dependencies]
 criterion = { version = "0.4", features = ["html_reports"] }

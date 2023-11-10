@@ -43,10 +43,7 @@ fn print_left_aligned(text: &str, _max_width: usize) {
     }
     print!("{}", COLUMN_SEPARATOR);
 }
-pub fn directly_stdout_manual_stdout_lock() {
-    let mut stdout = std::io::stdout();
-    let mut lock = stdout.lock();
-
+pub fn directly_stdout() {
     // Args
     let args = std::env::args().collect::<Vec<String>>();
     // #[cfg(debug_assertions)]
@@ -58,7 +55,7 @@ pub fn directly_stdout_manual_stdout_lock() {
         _ => std::env::current_dir().unwrap(),
     };
     if !path.exists() {
-        path = std::env::current_dir().unwrap();
+        path = Path::new("./testings").to_path_buf();
     }
 
     // #[cfg(debug_assertions)]

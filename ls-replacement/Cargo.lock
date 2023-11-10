@@ -509,6 +509,7 @@ dependencies = [
  "chrono",
  "criterion",
  "jwalk",
+ "rayon",
 ]
 
 [[package]]
