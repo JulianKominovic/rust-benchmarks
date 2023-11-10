@@ -24,6 +24,20 @@
         </ol>
       </li>
     </ul>
+    <h2>Example output</h2>
+    <pre>
+Permissions | Owner | Group | Size   | Modified             | Name                 | 
+----------- | ----- | ----- | ------ | -------------------- | -------------------- | 
+rw-rw-r--   | 1000  | 1000  | 19 KB  | 2023-11-09 20:25:07  | Cargo.lock           | 
+rwxrwxr-x   | 1000  | 1000  | 2 MB   | 2023-11-09 20:12:00  | testings             | 
+rwxrwxr-x   | 1000  | 1000  | 4 KB   | 2023-11-09 22:08:49  | assets               | 
+rwxrwxr-x   | 1000  | 1000  | 4 KB   | 2023-11-09 20:25:29  | src                  | 
+rw-rw-r--   | 1000  | 1000  | 356 B  | 2023-11-09 20:25:07  | Cargo.toml           | 
+rw-rw-r--   | 1000  | 1000  | 350 B  | 2023-11-09 20:11:54  | gen-big-folders.js   | 
+rwxrwxr-x   | 1000  | 1000  | 4 KB   | 2023-11-09 22:04:43  | target               | 
+rw-rw-r--   | 1000  | 1000  | 316 B  | 2023-11-09 21:59:38  | .gitignore           | 
+rwxrwxr-x   | 1000  | 1000  | 4 KB   | 2023-11-08 19:51:26  | benches              |</pre
+    >
     <h2>Results</h2>
 
     <table border="2">
@@ -35,8 +49,20 @@
       </thead>
       <tbody>
         <tr>
+          <td>ls</td>
+          <td>338.70 ms</td>
+        </tr>
+        <tr>
+          <td>Stdout directly</td>
+          <td>290.03 ms</td>
+        </tr>
+        <tr>
           <td>Buffer first reserving massive memory</td>
           <td>271.53 ms</td>
+        </tr>
+        <tr>
+          <td>Stdout directly manual std lock</td>
+          <td>247.21 ms</td>
         </tr>
         <tr>
           <td>Buffer first then push each line then stdout</td>
@@ -44,15 +70,7 @@
         </tr>
         <tr>
           <td>Parallel read directory then push each line then stdout</td>
-          <td>96.543 ms</td>
-        </tr>
-        <tr>
-          <td>Stdout directly</td>
-          <td>290.03 ms</td>
-        </tr>
-        <tr>
-          <td>Stdout directly manual std lock</td>
-          <td>247.21 ms</td>
+          <td>96.54 ms</td>
         </tr>
       </tbody>
     </table>
