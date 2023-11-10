@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rusty benchmarks</title>
+  </head>
+  <body>
+    <a href="./ls-replacement/report/index.html"><h1>ls replacement</h1></a>
+    <ul>
+      <li>Tested over 100.000 of ~164 Bytes each file</li>
+      <li>
+        5 ways
+
+        <ol>
+          <li>
+            Buffer first reserving massive memory (to avoid allocation) then
+            push each line then stdout
+          </li>
+          <li>Buffer first then push each line then stdout</li>
+          <li>Parallel read directory then push each line then stdout</li>
+          <li>Stdout directly</li>
+          <li>Stdout directly manual std lock</li>
+        </ol>
+      </li>
+    </ul>
+    <h2>Results</h2>
+
+    <table border="2">
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Mean time</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Buffer first reserving massive memory</td>
+          <td>271.53 ms</td>
+        </tr>
+        <tr>
+          <td>Buffer first then push each line then stdout</td>
+          <td>241.72 ms</td>
+        </tr>
+        <tr>
+          <td>Parallel read directory then push each line then stdout</td>
+          <td>96.543 ms</td>
+        </tr>
+        <tr>
+          <td>Stdout directly</td>
+          <td>290.03 ms</td>
+        </tr>
+        <tr>
+          <td>Stdout directly manual std lock</td>
+          <td>247.21 ms</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr />
+  </body>
+</html>
